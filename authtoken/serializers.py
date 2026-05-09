@@ -9,7 +9,6 @@ class SignUpSerializer(serializers.ModelSerializer):
     year = serializers.IntegerField(required=True)
     class Meta:
         model = User
-        # include confirm_password so it can be validated but not returned
         fields = ['username', 'password', 'confirm_password', 'email', 'year']
 
     def validate(self, data):
@@ -31,11 +30,10 @@ class SignUpSerializer(serializers.ModelSerializer):
 
     def validate_email(self, email):
         if User.objects.filter(email=email).exists():
-            raise ValidationError('Bu email allaqachon ro\'yxatdan o\'tgan!')
+            raise ValidationError('Bu email allaqon ro\'yxatdan o\'tgan!')
         return email
 
     def create(self, validated_data):
-        # Pop confirm_password because it's not a model field
         validated_data.pop('confirm_password', None)
         password = validated_data.pop('password')
         user = User(**validated_data)
@@ -43,3 +41,6 @@ class SignUpSerializer(serializers.ModelSerializer):
         user.save()
         return user
 
+class LoginSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    password = serializers.CharField(write_only=True)
